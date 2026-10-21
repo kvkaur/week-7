@@ -21,15 +21,33 @@ def fetch_location_data(geolocator, loc):
     location = geolocator.geocode(loc)
 
     if location is None:
-        return None
-    
-    return {"location": loc, "latitude": location.latitude, "longitude": location.longitude, "type": location.geo_type}
+        # Return missing values for invalid locations
+        return {
+            "location": loc,
+            "latitude": float("nan"),
+            "longitude": float("nan"),
+            "type": float("nan")
+        }
 
+    return {
+        "location": loc,
+        "latitude": location.latitude,
+        "longitude": location.longitude,
+        "type": location.raw.get("type")
+    }
+    
 def build_geo_dataframe(locations):
-    geo_data = [fetch_location_data(geolocator, loc) for loc in locations]
-    
-    return pd.DataFrame(geo_data)
+    # Create a geolocator
+    geolocator = get_geolocator()
 
+    # Collect data for each location
+    geo_data = [
+        fetch_location_data(geolocator, loc)
+        for loc in locations
+    ]
+
+    # Convert the results into a pandas DataFrame
+    return pd.DataFrame(geo_data)
 
 if __name__ == "__main__":
     geo = get_geolocator()
